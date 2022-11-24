@@ -1,76 +1,52 @@
 <?php
-if (isset($_POST['email'])) {
 
-    // EDIT THE 2 LINES BELOW AS REQUIRED
-    $email_to = "neyonill@gmail.com";
-    $email_subject = "New form submissions";
+/* Configuration */
+/*your web-mail*/
+$mailto  = 'neyonill@gmail.com';
 
-    function problem($error)
-    {
-        echo "We are very sorry, but there were error(s) found with the form you submitted. ";
-        echo "These errors appear below.<br><br>";
-        echo $error . "<br><br>";
-        echo "Please go back and fix these errors.<br><br>";
-        die();
-    }
 
-    // validation expected data exists
-    if (
-        !isset($_POST['first_name']) ||
-        !isset($_POST['email']) ||
-        !isset($_POST['message'])
-    ) {
-        problem('We are sorry, but there appears to be a problem with the form you submitted.');
-    }
+$name     	= strip_tags($_POST['first_name']);
+$sub     	= strip_tags($_POST['sub']);
+$email      = strip_tags($_POST['email']);
+$comments   = strip_tags($_POST['message']);
 
-    $name = $_POST['first_name']; // required
-    $email = $_POST['email']; // required
-    $message = $_POST['message']; // required
+$subject = "[Contact Form]";
 
-    $error_message = "";
-    $email_exp = '/^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/';
+// HTML for email to send submission details
+$body = "
+<br>
+<p><b>Message</b>: $comments</p>
+<p><b>Name</b>: $name <br>
+<p><b>Subject</b>: $sub <br>
+<b>Email</b>: $email<br>
+";
 
-    if (!preg_match($email_exp, $email)) {
-        $error_message .= 'The Email address you entered does not appear to be valid.<br>';
-    }
 
-    $string_exp = "/^[A-Za-z .'-]+$/";
+// Success Message
+$success = "Message Sent";
+$error = "Message Not Sent";
 
-    if (!preg_match($string_exp, $name)) {
-        $error_message .= 'The Name you entered does not appear to be valid.<br>';
-    }
 
-    if (strlen($message) < 2) {
-        $error_message .= 'The Message you entered do not appear to be valid.<br>';
-    }
+$headers = "From: $name <$email> \r\n";
+$headers .= "Reply-To: $email \r\n";
+$headers .= "MIME-Version: 1.0\r\n";
+$headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+$headers2 = "From:" . $mailto;
+$message = "<html><body>$body</body></html>";
 
-    if (strlen($error_message) > 0) {
-        problem($error_message);
-    }
+if(empty($name) || empty($sub) || empty($email) || empty($comments) ){
 
-    $email_message = "Form details below.\n\n";
-
-    function clean_string($string)
-    {
-        $bad = array("content-type", "bcc:", "to:", "cc:", "href");
-        return str_replace($bad, "", $string);
-    }
-
-    $email_message .= "first_name: " . clean_string($name) . "\n";
-    $email_message .= "email: " . clean_string($email) . "\n";
-    $email_message .= "message: " . clean_string($message) . "\n";
-
-    // create email headers
-    $headers = 'From: ' . $email . "\r\n" .
-        'Reply-To: ' . $email . "\r\n" .
-        'X-Mailer: PHP/' . phpversion();
-    @mail($email_to, $email_subject, $email_message, $headers);
-?>
-
-    <!-- include your success message below -->
-
-    Thank you for contacting us. We will be in touch with you very soon.
-
-<?php
+    echo "Fill The Form Properly"; // message
+    header("Location: http://kayodeoshinubi.github.io"); //go to home page
+    die();
+    
 }
-?>
+
+else {
+
+    if (mail($mailto, $subject, $message, $headers)) {
+        echo "$success"; // success
+    } else {
+        echo "$error"; // failure
+    }
+}
